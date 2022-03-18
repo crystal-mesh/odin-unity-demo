@@ -1,0 +1,24 @@
+{
+    "name": "Werwolf",
+    "rootNamespace": "",
+    "references": [
+        "GUID:57f1b02dffeb4ac49aa75bc225fe7ee2",
+        "GUID:297a9100e95d28442bcb6e78fa2f8947",
+        "GUID:9c9b4fe8b39ae5b41a7700da7b05a2c7",
+        "GUID:831409e8f9d13b5479a3baef9822ad34",
+        "GUID:08f68d9b784fad24b81a48412d8f14fe",
+        "GUID:343deaaf83e0cee4ca978e7df0b80d21",
+        "GUID:2bafac87e7f4b9b418d9448d219b01ab",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:57c32fc907df0f54e8e6e8f0d2488336"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -12,13 +12,13 @@ namespace ODIN_Sample.Scripts.Runtime.Photon
     public class PhotonInitialiseConnection : MonoBehaviourPunCallbacks
     {
         /// <summary>
-        /// If true, we'll automatically join the room given by <see cref="roomName"/>.
+        ///     If true, we'll automatically join the room given by <see cref="roomName" />.
         /// </summary>
         [SerializeField] private bool autoJoin;
 
         /// <summary>
-        /// Room to join, if <see cref="autoJoin"/> is set to true or if <see cref="JoinPhotonRoom"/> is called on
-        /// this script.
+        ///     Room to join, if <see cref="autoJoin" /> is set to true or if <see cref="JoinPhotonRoom" /> is called on
+        ///     this script.
         /// </summary>
         [SerializeField] private string roomName = "DefaultPhotonRoom";
 
@@ -43,7 +43,7 @@ namespace ODIN_Sample.Scripts.Runtime.Photon
         }
 
         /// <summary>
-        /// Connect to the photon room given by <see cref="roomName"/>.
+        ///     Connect to the photon room given by <see cref="roomName" />.
         /// </summary>
         public void JoinPhotonRoom()
         {

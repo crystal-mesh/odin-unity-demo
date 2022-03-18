@@ -6,9 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/ODIN-Sample/Scenes/Lobby.unity
-    guid: 0b710b7d9f236ba4f89805ce02330ea3
+    path: Assets/Werwolf/Scenes/WerwolfLobby.unity
+    guid: 62f0f4375cfeda94ea401b81e4ccaf29
   - enabled: 1
-    path: Assets/ODIN-Sample/Scenes/DemoLevel.unity
-    guid: acb1f9829f8e07645bdaa81dec6e5b33
+    path: Assets/Werwolf/Scenes/WerwolfGame.unity
+    guid: 08f0220269900c547a0106775fdf073c
   m_configObjects: {}
