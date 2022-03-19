@@ -27,6 +27,16 @@ namespace Werwolf.Scripts
             }
         }
 
+        public bool IsLocalPlayerAlive()
+        {
+            return IsAlive(PhotonNetwork.LocalPlayer.ActorNumber);
+        }
+
+        public bool IsAlive(int actorNumber)
+        {
+            return GetByPhotonActorNumber(actorNumber);
+        }
+
         public GameObject GetLocalPlayer()
         {
             if (!_localPlayer)
@@ -52,6 +62,16 @@ namespace Werwolf.Scripts
                     return player;
             }
 
+            return null;
+        }
+
+        public PhotonView GetPhotonViewByActorNumber(int actorNumber)
+        {
+            GameObject player = GetByPhotonActorNumber(actorNumber);
+            if (player)
+            {
+                return player.GetComponent<PhotonView>();
+            }
             return null;
         }
     }

@@ -3,44 +3,48 @@ using Photon.Pun;
 using TMPro;
 using UnityEngine;
 
-public class WerwolfStateMachine : MonoBehaviourPunCallbacks
+namespace Werwolf.Scripts
 {
-    [SerializeField] private TMP_Text stateDisplay;
-    private readonly Dictionary<string, GameObject> states = new Dictionary<string, GameObject>();
-
-    private void Awake()
+    public class WerwolfStateMachine : MonoBehaviourPunCallbacks
     {
-        for (int i = 0; i < transform.childCount; ++i)
+        [SerializeField] private TMP_Text stateDisplay;
+        private readonly Dictionary<string, GameObject> states = new Dictionary<string, GameObject>();
+
+        private void Awake()
         {
-            GameObject state = transform.GetChild(i).gameObject;
-            states.Add(state.name, state);
+            for (int i = 0; i < transform.childCount; ++i)
+            {
+                GameObject state = transform.GetChild(i).gameObject;
+                states.Add(state.name, state);
+            }
+
+            DeactivateAllStates();
+
+            string firstStateName = transform.GetChild(0).gameObject.name;
+            SwitchState(firstStateName);
         }
 
-        DeactivateAllStates();
 
-        string firstStateName = transform.GetChild(0).gameObject.name;
-        SwitchState(firstStateName);
-    }
-
-
-    private void DeactivateAllStates()
-    {
-        foreach (GameObject value in states.Values) value.SetActive(false);
-    }
-
-    public void SwitchState(string nextState)
-    {
-        if (PhotonNetwork.IsMasterClient) photonView.RPC("ReceiveStateSwitch", RpcTarget.AllBuffered, nextState);
-    }
-
-    [PunRPC]
-    private void ReceiveStateSwitch(string newState)
-    {
-        if (states.TryGetValue(newState, out GameObject foundState))
+        private void DeactivateAllStates()
         {
-            DeactivateAllStates();
-            stateDisplay.text = "State: " + newState;
-            foundState.SetActive(true);
+            foreach (GameObject value in states.Values) value.SetActive(false);
+        }
+
+        public void SwitchState(string nextState)
+        {
+            // only let the master client actually change the game state
+            if (PhotonNetwork.IsMasterClient) photonView.RPC("ReceiveStateSwitch", RpcTarget.AllBuffered, nextState);
+        }
+
+        [PunRPC]
+        private void ReceiveStateSwitch(string newState)
+        {
+            if (states.TryGetValue(newState, out GameObject foundState))
+            {
+                DeactivateAllStates();
+                stateDisplay.text = "State: " + newState;
+                foundState.SetActive(true);
+            }
         }
     }
 }

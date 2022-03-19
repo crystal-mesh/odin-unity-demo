@@ -35,7 +35,7 @@ namespace Werwolf.Scripts
                 foreach (GameObject player in players.All)
                 {
                     PhotonView photonView = player.GetComponent<PhotonView>();
-                    BasicPlayerBehaviour playerBehaviour = player.GetComponent<BasicPlayerBehaviour>();
+                    WerwolfPlayer playerBehaviour = player.GetComponent<WerwolfPlayer>();
 
                     // only werewolves are allowed to see at night currently
                     if (playerBehaviour.CurrentRole == RoleTypes.Werewolf)
@@ -44,11 +44,11 @@ namespace Werwolf.Scripts
                         photonView.RPC("SetCanSee", RpcTarget.All, false);
                 }
 
-            BasicPlayerBehaviour basicPlayerBehaviour = players.GetLocalPlayer().GetComponent<BasicPlayerBehaviour>();
+            WerwolfPlayer basicPlayerBehaviour = players.GetLocalPlayer().GetComponent<WerwolfPlayer>();
 
             bool isWerewolf = basicPlayerBehaviour.CurrentRole == RoleTypes.Werewolf;
-            voteManager.StartVote(isWerewolf);
-            voteManager.OnVoteEnded += OnVoteEnded;
+            voteManager.StartVote(isWerewolf, 1.0f, RoleTypes.Werewolf);
+            voteManager.OnVoteCriteriaMatched += OnVoteEnded;
             villagerDisplay.gameObject.SetActive(!isWerewolf);
 
             _NightCountdown = StartCoroutine(NightCountdown());
@@ -57,7 +57,7 @@ namespace Werwolf.Scripts
         private void OnDisable()
         {
             voteManager.SetVisibility(false);
-            voteManager.OnVoteEnded -= OnVoteEnded;
+            voteManager.OnVoteCriteriaMatched -= OnVoteEnded;
         }
 
         private void OnVoteEnded(VoteResultData result)
@@ -66,7 +66,7 @@ namespace Werwolf.Scripts
             if (PhotonNetwork.CurrentRoom.Players.TryGetValue(result.ActorNumber, out Player kickedPlayer))
             {
                 nightDisplay.text = $"Player {kickedPlayer.NickName} was eaten...";
-                if (PhotonNetwork.IsMasterClient)
+                if (kickedPlayer.IsLocal)
                 {
                     GameObject kickedPlayerObject = players.GetByPhotonActorNumber(kickedPlayer.ActorNumber);
                     PhotonNetwork.Destroy(kickedPlayerObject);
@@ -75,10 +75,10 @@ namespace Werwolf.Scripts
             else
             {
                 nightDisplay.text =
-                    "The Vote ended, but we couldn't determine who was eaten. Weird... Anyway, let's move on.";
+                    "The Vote ended, nobody was killed. Let's move on.";
             }
 
-
+            voteManager.SetVisibility(false);
             StartCoroutine(DelayedSwitchState(4.0f));
         }
 

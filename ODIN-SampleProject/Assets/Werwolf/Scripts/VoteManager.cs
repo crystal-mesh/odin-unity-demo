@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -17,10 +18,18 @@ namespace Werwolf.Scripts
 
         private readonly Dictionary<int, VoteData> voteDataDictionary = new Dictionary<int, VoteData>();
 
-        public Action<VoteResultData> OnVoteEnded;
+        private float _requiredVotesPercentage = 1.0f;
+
+        public Action<VoteResultData> OnVoteCriteriaMatched;
 
         public int TotalVotes { get; private set; }
         public int NumPossibleVotes { get; private set; }
+
+        public float RequiredVotesPercentage
+        {
+            get => _requiredVotesPercentage;
+            private set => _requiredVotesPercentage = Mathf.Clamp01(value);
+        }
 
         private void Reset()
         {
@@ -40,40 +49,50 @@ namespace Werwolf.Scripts
             foreach (Transform child in transform) child.gameObject.SetActive(isVisible);
         }
 
-        public void StartVote(bool isVisible)
+        public void StartVote(bool isVisible, float requiredVotesPercentage = 1.0f, params RoleTypes[] excludedRoles)
         {
             Reset();
             SetVisibility(isVisible);
+            RequiredVotesPercentage = requiredVotesPercentage;
 
-            if (!PhotonNetwork.IsConnected)
+            if (!PhotonNetwork.IsConnected || !players.IsLocalPlayerAlive())
                 return;
 
             foreach (GameObject player in players.All)
             {
-                PhotonView playerView = player.GetComponent<PhotonView>();
+                WerwolfPlayer werwolfPlayer = player.GetComponent<WerwolfPlayer>();
+                RoleTypes role = werwolfPlayer.CurrentRole;
+                // allow votes, if the player has one of the voted roles or if
+                bool canVoteOnPlayer = !excludedRoles.Contains(role);
 
-                Player photonPlayer = playerView.Controller;
-
-                VoteView voteView = Instantiate(voteViewPrefab, playerListRoot);
-                voteView.OnChangedVote += OnChangedVote;
-
-                // Make sure we can connect the vote UI to the correct actor by using the actor number
-                int actorNumber = photonPlayer.ActorNumber;
-                voteView.Init(actorNumber, toggleGroup);
-
-                // Ensure the player can't vote for her/him/themselves
-                bool isLocalPlayer = actorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
-                voteView.SetToggleActive(!isLocalPlayer);
-                if (!isLocalPlayer)
-                    NumPossibleVotes++;
-
-                // Show player name
-                string playerName = photonPlayer.NickName;
-                voteView.SetPlayerName(playerName);
-
-                // Add To Dictionary
-                voteDataDictionary.Add(actorNumber, new VoteData { View = voteView });
+                if (canVoteOnPlayer) CreateVoteView(player);
             }
+        }
+
+        private void CreateVoteView(GameObject player)
+        {
+            PhotonView playerView = player.GetComponent<PhotonView>();
+            Player photonPlayer = playerView.Controller;
+
+            VoteView voteView = Instantiate(voteViewPrefab, playerListRoot);
+            voteView.OnChangedVote += OnChangedVote;
+
+            // Make sure we can connect the vote UI to the correct actor by using the actor number
+            int actorNumber = photonPlayer.ActorNumber;
+            voteView.Init(actorNumber, toggleGroup);
+
+            // Ensure the player can't vote for her/him/themselves
+            bool isLocalPlayer = actorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
+            voteView.SetToggleActive(!isLocalPlayer);
+            if (!isLocalPlayer)
+                NumPossibleVotes++;
+
+            // Show player name
+            string playerName = photonPlayer.NickName;
+            voteView.SetPlayerName(playerName);
+
+            // Add To Dictionary
+            voteDataDictionary.Add(actorNumber, new VoteData { View = voteView });
         }
 
         private void OnChangedVote(int actorNumber, bool newActive)
@@ -87,8 +106,10 @@ namespace Werwolf.Scripts
             if (voteDataDictionary.TryGetValue(actorNumber, out VoteData voteData))
             {
                 voteData.Count += difference;
-                voteData.View.SetVoteCount(voteData.Count);
                 TotalVotes += difference;
+                if (voteData.View)
+                    voteData.View.SetVoteCount(voteData.Count);
+
                 Debug.Log(
                     $"ReceiveChangedVoteCount: {actorNumber} voted: {voteData.Count}, total Votes: {TotalVotes}");
 
@@ -107,15 +128,21 @@ namespace Werwolf.Scripts
                 foreach (KeyValuePair<int, VoteData> voteEntry in voteDataDictionary)
                 {
                     VoteData voteData = voteEntry.Value;
-                    if (voteData.Count >= NumPossibleVotes)
+                    if ((float)voteData.Count / NumPossibleVotes >= RequiredVotesPercentage)
                         photonView.RPC("ReceivedVoteResult", RpcTarget.All, voteData.Count, voteEntry.Key);
                 }
         }
 
+        /// <summary>
+        ///     Receiving the actor with the highest number of votes
+        /// </summary>
+        /// <param name="count"></param>
+        /// <param name="actorNumber"></param>
         [PunRPC]
         private void ReceivedVoteResult(int count, int actorNumber)
         {
-            OnVoteEnded?.Invoke(new VoteResultData
+            Debug.Log($"Received Vote Result: {actorNumber} was voted with {count} Votes");
+            OnVoteCriteriaMatched?.Invoke(new VoteResultData
             {
                 Count = count, ActorNumber = actorNumber
             });

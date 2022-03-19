@@ -10,6 +10,7 @@ namespace Werwolf.Scripts
         [Header("Settings")] [SerializeField] private string nextState;
 
         [SerializeField] private int minWerwolfCount = 1;
+        [SerializeField] private float werewolfPercentage = 0.33f;
 
 
         [Header("References")] [SerializeField]
@@ -38,26 +39,31 @@ namespace Werwolf.Scripts
                 currentRoomPlayerCount = PhotonNetwork.CurrentRoom.PlayerCount;
             }
 
-            int werwolfNum = currentRoomPlayerCount / 3;
-            werwolfNum = Mathf.Max(minWerwolfCount, werwolfNum);
 
             players.All.Clear();
             players.All.AddRange(playerArray);
-
             List<GameObject> villagers = new List<GameObject>(playerArray);
-            for (int i = 0; i < werwolfNum; i++)
-            {
-                int werwolfIndex = Random.Range(0, villagers.Count);
-                GameObject werwolf = villagers[werwolfIndex];
 
-                SendRole(werwolf, RoleTypes.Werewolf);
-
-                villagers.RemoveAt(werwolfIndex);
-            }
+            SelectWerewolves(ref villagers, werewolfPercentage);
 
             foreach (GameObject villager in villagers) SendRole(villager, RoleTypes.Villager);
 
             stateMachine.SwitchState(nextState);
+        }
+
+        private void SelectWerewolves(ref List<GameObject> villagers, float percentage = 0.33f)
+        {
+            int werwolfNum = Mathf.FloorToInt(villagers.Count * percentage);
+            werwolfNum = Mathf.Max(minWerwolfCount, werwolfNum);
+            for (int i = 0; i < werwolfNum; i++)
+            {
+                int werwolfIndex = Random.Range(0, villagers.Count);
+                GameObject werewolf = villagers[werwolfIndex];
+
+                SendRole(werewolf, RoleTypes.Werewolf);
+
+                villagers.RemoveAt(werwolfIndex);
+            }
         }
 
         private void SendRole(GameObject target, RoleTypes roleType)

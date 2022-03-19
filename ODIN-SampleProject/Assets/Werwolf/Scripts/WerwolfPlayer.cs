@@ -4,14 +4,12 @@ using UnityEngine;
 
 namespace Werwolf.Scripts
 {
-    public class BasicPlayerBehaviour : MonoBehaviourPun
+    public class WerwolfPlayer : MonoBehaviourPun
     {
         [SerializeField] private GameObject blindingCanvas;
         [SerializeField] private TMP_Text roleDisplay;
 
         [SerializeField] private Roles roles;
-
-
         [HideInInspector] public RoleTypes CurrentRole;
 
 
