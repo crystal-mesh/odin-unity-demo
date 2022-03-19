@@ -7,20 +7,22 @@ namespace Werwolf.Scripts
 {
     public class CountDownState : MonoBehaviour
     {
-        [SerializeField] private string nextState = "RollenAuswaehlen";
-        [SerializeField] private TMP_Text countDownDisplay;
+        [Header("Settings")] [SerializeField] private string nextState = "RollenAuswaehlen";
+
         [SerializeField] private int minNumPlayers = 4;
         [SerializeField] private int countDown = 3;
+        [SerializeField] private string notEnoughPlayersMessage = "Not Enough Players, waiting for more";
+
+        [Header("References")] [SerializeField]
+        private TMP_Text countDownDisplay;
 
 
-        private int Counter;
-
-
-        private WerwolfStateMachine werwolfStateMachine;
+        private int _counter;
+        private WerwolfStateMachine _werwolfStateMachine;
 
         private void OnEnable()
         {
-            werwolfStateMachine = GetComponentInParent<WerwolfStateMachine>();
+            _werwolfStateMachine = GetComponentInParent<WerwolfStateMachine>();
             StartCoroutine(CheckNumPlayer());
         }
 
@@ -36,7 +38,7 @@ namespace Werwolf.Scripts
                 var currentRoomPlayerCount = PhotonNetwork.CurrentRoom.PlayerCount;
                 while (currentRoomPlayerCount < minNumPlayers)
                 {
-                    countDownDisplay.text = "Not Enough Players, waiting for more";
+                    countDownDisplay.text = notEnoughPlayersMessage;
                     yield return new WaitForSeconds(1.0f);
                     currentRoomPlayerCount = PhotonNetwork.CurrentRoom.PlayerCount;
                 }
@@ -47,15 +49,15 @@ namespace Werwolf.Scripts
 
         private IEnumerator CountDown()
         {
-            Counter = countDown;
-            while (Counter > 0)
+            _counter = countDown;
+            while (_counter > 0)
             {
-                countDownDisplay.text = Counter.ToString();
-                Counter--;
+                countDownDisplay.text = _counter.ToString();
+                _counter--;
                 yield return new WaitForSeconds(1.0f);
             }
 
-            werwolfStateMachine.SwitchState(nextState);
+            _werwolfStateMachine.SwitchState(nextState);
         }
     }
 }

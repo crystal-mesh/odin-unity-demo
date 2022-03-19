@@ -7,11 +7,15 @@ namespace Werwolf.Scripts
 {
     public class ChooseRolesState : MonoBehaviour
     {
-        [SerializeField] private PlayerList players;
-        [SerializeField] private Roles roles;
+        [Header("Settings")] [SerializeField] private string nextState;
+
         [SerializeField] private int minWerwolfCount = 1;
 
-        [SerializeField] private string nextState;
+
+        [Header("References")] [SerializeField]
+        private PlayerList players;
+
+        [SerializeField] private Roles roles;
 
 
         [SerializeField] private WerwolfStateMachine stateMachine;
@@ -37,8 +41,8 @@ namespace Werwolf.Scripts
             int werwolfNum = currentRoomPlayerCount / 3;
             werwolfNum = Mathf.Max(minWerwolfCount, werwolfNum);
 
-            players.all.Clear();
-            players.all.AddRange(playerArray);
+            players.All.Clear();
+            players.All.AddRange(playerArray);
 
             List<GameObject> villagers = new List<GameObject>(playerArray);
             for (int i = 0; i < werwolfNum; i++)

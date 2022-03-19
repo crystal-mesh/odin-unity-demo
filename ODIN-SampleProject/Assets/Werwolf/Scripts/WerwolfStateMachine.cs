@@ -39,7 +39,7 @@ public class WerwolfStateMachine : MonoBehaviourPunCallbacks
         if (states.TryGetValue(newState, out GameObject foundState))
         {
             DeactivateAllStates();
-            stateDisplay.text = newState;
+            stateDisplay.text = "State: " + newState;
             foundState.SetActive(true);
         }
     }

@@ -11,7 +11,7 @@ namespace Werwolf.Scripts
         private void OnEnable()
         {
             if (PhotonNetwork.IsMasterClient)
-                foreach (GameObject player in players.all)
+                foreach (GameObject player in players.All)
                 {
                     PhotonView photonView = player.GetComponent<PhotonView>();
                     photonView.RPC("SetCanSee", RpcTarget.All, true);

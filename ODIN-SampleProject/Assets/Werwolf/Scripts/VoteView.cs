@@ -34,6 +34,10 @@ namespace Werwolf.Scripts
             _toggle.group = group;
         }
 
+        public void SetToggleActive(bool toggleActive)
+        {
+            _toggle.interactable = toggleActive;
+        }
 
         public void SetPlayerName(string newName)
         {
