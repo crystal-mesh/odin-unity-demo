@@ -396,4 +396,4 @@ MonoBehaviour:
   blindingCanvas: {fileID: 8825139611449390512}
   roleDisplay: {fileID: 1099498616565852407}
   roles: {fileID: 11400000, guid: 760a4f2c36fc1e246bf04f46927eaace, type: 2}
-  CurrentRole: 0
+  players: {fileID: 11400000, guid: f96e29fee2489324ba11c3f5fddda677, type: 2}

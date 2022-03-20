@@ -21,6 +21,8 @@ namespace Werwolf.Scripts
         private float _requiredVotesPercentage = 1.0f;
 
         public Action<VoteResultData> OnVoteCriteriaMatched;
+        // Gets called, when the vote data was updated, but the vote criteria was not yet reached.
+        public Action OnInvalidVote;
 
         public int TotalVotes { get; private set; }
         public int NumPossibleVotes { get; private set; }
@@ -84,15 +86,14 @@ namespace Werwolf.Scripts
             // Ensure the player can't vote for her/him/themselves
             bool isLocalPlayer = actorNumber == PhotonNetwork.LocalPlayer.ActorNumber;
             voteView.SetToggleActive(!isLocalPlayer);
-            if (!isLocalPlayer)
-                NumPossibleVotes++;
 
             // Show player name
             string playerName = photonPlayer.NickName;
             voteView.SetPlayerName(playerName);
 
             // Add To Dictionary
-            voteDataDictionary.Add(actorNumber, new VoteData { View = voteView });
+            NumPossibleVotes++;
+            voteDataDictionary.Add(actorNumber, new VoteData { View = voteView, ActorNumber = actorNumber, Count = 0 });
         }
 
         private void OnChangedVote(int actorNumber, bool newActive)
@@ -125,12 +126,29 @@ namespace Werwolf.Scripts
         private void TryEndVote()
         {
             if (PhotonNetwork.IsMasterClient)
+            {
+                VoteData validVote = null;
                 foreach (KeyValuePair<int, VoteData> voteEntry in voteDataDictionary)
                 {
                     VoteData voteData = voteEntry.Value;
-                    if ((float)voteData.Count / NumPossibleVotes >= RequiredVotesPercentage)
-                        photonView.RPC("ReceivedVoteResult", RpcTarget.All, voteData.Count, voteEntry.Key);
+                    if (HasRequiredVoteCount(voteData))
+                    {
+                        validVote = voteData;
+                        break;
+                    }
                 }
+
+                if (null != validVote)
+                    photonView.RPC("ReceivedVoteResult", RpcTarget.All, validVote.Count, validVote.ActorNumber);
+                else
+                    photonView.RPC("ReceivedInvalidVote", RpcTarget.All);
+            }
+
+        }
+
+        private bool HasRequiredVoteCount(VoteData voteData)
+        {
+            return (float)voteData.Count / NumPossibleVotes >= RequiredVotesPercentage;
         }
 
         /// <summary>
@@ -144,12 +162,20 @@ namespace Werwolf.Scripts
             Debug.Log($"Received Vote Result: {actorNumber} was voted with {count} Votes");
             OnVoteCriteriaMatched?.Invoke(new VoteResultData
             {
-                Count = count, ActorNumber = actorNumber
+                Count = count,
+                ActorNumber = actorNumber
             });
+        }
+
+        [PunRPC]
+        private void ReceivedInvalidVote()
+        {
+            OnInvalidVote?.Invoke();
         }
 
         public class VoteData
         {
+            public int ActorNumber;
             public int Count;
             public VoteView View;
         }

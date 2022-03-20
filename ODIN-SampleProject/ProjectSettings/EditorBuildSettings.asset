@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Werwolf/Scenes/WerwolfGame.unity
     guid: 08f0220269900c547a0106775fdf073c
+  - enabled: 1
+    path: Assets/Werwolf/Scenes/WerwolfRestart.unity
+    guid: df5e07816b9ee104397a5dc2d373f1c6
   m_configObjects: {}

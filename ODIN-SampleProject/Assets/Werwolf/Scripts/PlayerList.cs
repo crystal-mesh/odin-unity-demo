@@ -34,7 +34,7 @@ namespace Werwolf.Scripts
 
         public bool IsAlive(int actorNumber)
         {
-            return GetByPhotonActorNumber(actorNumber);
+            return GetGameObjectByActorNumber(actorNumber);
         }
 
         public GameObject GetLocalPlayer()
@@ -53,7 +53,7 @@ namespace Werwolf.Scripts
             return _localPlayer;
         }
 
-        public GameObject GetByPhotonActorNumber(int actorNumber)
+        public GameObject GetGameObjectByActorNumber(int actorNumber)
         {
             foreach (GameObject player in All)
             {
@@ -67,12 +67,41 @@ namespace Werwolf.Scripts
 
         public PhotonView GetPhotonViewByActorNumber(int actorNumber)
         {
-            GameObject player = GetByPhotonActorNumber(actorNumber);
+            GameObject player = GetGameObjectByActorNumber(actorNumber);
             if (player)
             {
                 return player.GetComponent<PhotonView>();
             }
             return null;
+        }
+
+        public int GetRoleCount(RoleTypes role)
+        {
+            int count = 0;
+            foreach(GameObject playerObject in All)
+            {
+                WerwolfPlayer player = playerObject.GetComponent<WerwolfPlayer>();
+                if (role == player.CurrentRole)
+                    count++;
+            }
+            return count;
+        }
+
+        public bool IsGameOver()
+        {
+            bool isGameOver = false;
+
+            int werewolveCount = GetRoleCount(RoleTypes.Werewolf);
+            int totalPlayerCount = All.Count;
+
+            // Game Over Conditions:
+            if(werewolveCount >= Mathf.CeilToInt(totalPlayerCount / 2))
+                isGameOver = true;
+            
+            if (werewolveCount == 0)
+                isGameOver = true;
+
+            return isGameOver;
         }
     }
 }

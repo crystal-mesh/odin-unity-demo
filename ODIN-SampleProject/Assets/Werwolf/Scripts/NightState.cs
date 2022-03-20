@@ -31,6 +31,7 @@ namespace Werwolf.Scripts
 
         private void OnEnable()
         {
+            // All but the werewolve should be blinded
             if (PhotonNetwork.IsMasterClient)
                 foreach (GameObject player in players.All)
                 {
@@ -44,18 +45,30 @@ namespace Werwolf.Scripts
                         photonView.RPC("SetCanSee", RpcTarget.All, false);
                 }
 
-            WerwolfPlayer basicPlayerBehaviour = players.GetLocalPlayer().GetComponent<WerwolfPlayer>();
+            GameObject localPlayer = players.GetLocalPlayer();
+            if (localPlayer)
+            {
+                WerwolfPlayer basicPlayerBehaviour = players.GetLocalPlayer().GetComponent<WerwolfPlayer>();
+                bool canSeeVote = basicPlayerBehaviour.CurrentRole == RoleTypes.Werewolf;
 
-            bool isWerewolf = basicPlayerBehaviour.CurrentRole == RoleTypes.Werewolf;
-            voteManager.StartVote(isWerewolf, 1.0f, RoleTypes.Werewolf);
-            voteManager.OnVoteCriteriaMatched += OnVoteEnded;
-            villagerDisplay.gameObject.SetActive(!isWerewolf);
+                // Only show the vote to the local player, if they are a werewolf. 
+                voteManager.StartVote(canSeeVote, 1.0f, RoleTypes.Werewolf);
+                voteManager.OnVoteCriteriaMatched += OnVoteEnded;
+                villagerDisplay.gameObject.SetActive(!canSeeVote);
+            }
 
             _NightCountdown = StartCoroutine(NightCountdown());
         }
 
         private void OnDisable()
         {
+            if (PhotonNetwork.IsConnectedAndReady &&  PhotonNetwork.IsMasterClient)
+                foreach (GameObject player in players.All)
+                {
+                    PhotonView photonView = player.GetComponent<PhotonView>();
+                    photonView.RPC("SetCanSee", RpcTarget.All, true);
+                }
+
             voteManager.SetVisibility(false);
             voteManager.OnVoteCriteriaMatched -= OnVoteEnded;
         }
@@ -66,10 +79,10 @@ namespace Werwolf.Scripts
             if (PhotonNetwork.CurrentRoom.Players.TryGetValue(result.ActorNumber, out Player kickedPlayer))
             {
                 nightDisplay.text = $"Player {kickedPlayer.NickName} was eaten...";
+                PhotonView killedPlayerView = players.GetPhotonViewByActorNumber(kickedPlayer.ActorNumber);
                 if (kickedPlayer.IsLocal)
                 {
-                    GameObject kickedPlayerObject = players.GetByPhotonActorNumber(kickedPlayer.ActorNumber);
-                    PhotonNetwork.Destroy(kickedPlayerObject);
+                    PhotonNetwork.Destroy(killedPlayerView);
                 }
             }
             else
@@ -78,12 +91,12 @@ namespace Werwolf.Scripts
                     "The Vote ended, nobody was killed. Let's move on.";
             }
 
-            voteManager.SetVisibility(false);
             StartCoroutine(DelayedSwitchState(4.0f));
         }
 
         private IEnumerator DelayedSwitchState(float duration)
         {
+            voteManager.SetVisibility(false);
             yield return new WaitForSeconds(duration);
             stateMachine.SwitchState(nextState);
         }

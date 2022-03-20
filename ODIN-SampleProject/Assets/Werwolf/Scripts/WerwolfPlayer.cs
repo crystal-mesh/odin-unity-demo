@@ -10,13 +10,21 @@ namespace Werwolf.Scripts
         [SerializeField] private TMP_Text roleDisplay;
 
         [SerializeField] private Roles roles;
-        [HideInInspector] public RoleTypes CurrentRole;
-
+        [SerializeField] private PlayerList players;
+         public RoleTypes CurrentRole { get; set; }
 
         private void OnEnable()
         {
             roleDisplay.text = "";
             blindingCanvas.SetActive(false);
+            // Player should add themselves to the list
+            players.All.Add(this.gameObject);
+        }
+
+        private void OnDisable()
+        {
+            // Player should remove themselves from the list
+            players.All.Remove(this.gameObject);
         }
 
         [PunRPC]

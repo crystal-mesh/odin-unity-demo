@@ -31,18 +31,13 @@ namespace Werwolf.Scripts
         {
             int currentRoomPlayerCount = PhotonNetwork.CurrentRoom.PlayerCount;
 
-            GameObject[] playerArray = GameObject.FindGameObjectsWithTag("Player");
-            while (playerArray.Length != currentRoomPlayerCount)
+            while (players.All.Count != currentRoomPlayerCount)
             {
                 yield return new WaitForSeconds(0.25f);
-                playerArray = GameObject.FindGameObjectsWithTag("Player");
                 currentRoomPlayerCount = PhotonNetwork.CurrentRoom.PlayerCount;
             }
 
-
-            players.All.Clear();
-            players.All.AddRange(playerArray);
-            List<GameObject> villagers = new List<GameObject>(playerArray);
+            List<GameObject> villagers = new List<GameObject>(players.All);
 
             SelectWerewolves(ref villagers, werewolfPercentage);
 

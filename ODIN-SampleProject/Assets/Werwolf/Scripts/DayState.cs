@@ -1,5 +1,6 @@
 ﻿using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -9,12 +10,15 @@ namespace Werwolf.Scripts
 {
     public class DayState : MonoBehaviourPun
     {
-        [SerializeField] private float RequiredVotesPercentage = 0.51f;
-        [SerializeField] private float FinalCountdownDuration = 5.0f;
+        [Header("Settings")]
+        [SerializeField] private float requiredVotesPercentage = 0.51f;
+        [SerializeField] private float finalCountdownDuration = 5.0f;
+        [SerializeField] private string nextState = "Night";
 
+        [Header("References")]
         [SerializeField] private PlayerList players;
         [SerializeField] private VoteManager voteManager;
-
+        [SerializeField] private WerwolfStateMachine stateMachine;
         [SerializeField] private Button votingButton;
         [SerializeField] private TMP_Text dayStatusDisplay;
 
@@ -22,6 +26,7 @@ namespace Werwolf.Scripts
 
         private void OnEnable()
         {
+            dayStatusDisplay.text = "";
             if (PhotonNetwork.IsMasterClient)
                 foreach (GameObject player in players.All)
                 {
@@ -48,37 +53,66 @@ namespace Werwolf.Scripts
         private void ReceiveDayVoteRequest()
         {
             votingButton.gameObject.SetActive(false);
-            voteManager.StartVote(true, RequiredVotesPercentage);
+            voteManager.StartVote(true, requiredVotesPercentage);
             voteManager.OnVoteCriteriaMatched += OnVoteCriteriaMatched;
+            voteManager.OnInvalidVote += OnReceivedInvalidVoteResult;
+        }
+
+        private void OnReceivedInvalidVoteResult()
+        {
+            if(null != _CountDownRoutine)
+            {
+                dayStatusDisplay.text = $"Stopped Countdown.";
+                StopCoroutine(_CountDownRoutine);
+            }
         }
 
         private void OnVoteCriteriaMatched(VoteResultData resultData)
         {
-            StopCoroutine(_CountDownRoutine);
+            if(null != _CountDownRoutine)
+                StopCoroutine(_CountDownRoutine);
             _CountDownRoutine = StartCoroutine(StartVoteCountdown(resultData));
         }
 
         private IEnumerator StartVoteCountdown(VoteResultData resultData)
         {
-            float remainingCountDown = FinalCountdownDuration;
+            float remainingCountDown = finalCountdownDuration;
 
+            // Get player from photon network
             if(PhotonNetwork.CurrentRoom.Players.TryGetValue(resultData.ActorNumber, out Player target)){
+
+                // perform countdown
+                string targetName = target.NickName;
                 while (remainingCountDown > 0.0f)
                 {
-                    dayStatusDisplay.text = $"Kicking {target.NickName} in {remainingCountDown.ToString("0")}";
+                    dayStatusDisplay.text = $"{targetName} will be killed in {remainingCountDown.ToString("0")}";
                     remainingCountDown -= 1.0f;
                     yield return new WaitForSeconds(1.0f);
                 }
 
-
-                PhotonView playerView = players.GetPhotonViewByActorNumber(resultData.ActorNumber);
-                if (playerView.ControllerActorNr == PhotonNetwork.LocalPlayer.ActorNumber)
+                // if we get here, the countdown was not canceled, so kill target player
+                GameObject playerObject = players.GetGameObjectByActorNumber(resultData.ActorNumber);
+                if (playerObject)
                 {
-                    PhotonNetwork.Destroy(playerView);
+                    WerwolfPlayer player = playerObject.GetComponent<WerwolfPlayer>();
+                    RoleTypes killedPlayerRole = player.CurrentRole;
+                    dayStatusDisplay.text = $"You decided to kill {targetName}, who was a {killedPlayerRole}";
+
+                    if (target.IsLocal)
+                    {
+                        PhotonView playerView = playerObject.GetComponent<PhotonView>();
+                        PhotonNetwork.Destroy(playerView);
+                    }
+                }
+                else
+                {
+                    dayStatusDisplay.text = $"The vote has ended, but nobody was killed.";
                 }
             }
-        }
 
+            yield return new WaitForSeconds(3.0f);
+            stateMachine.SwitchState(nextState);
+        }
 
     }
 }

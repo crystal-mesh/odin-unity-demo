@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using TMPro;
@@ -9,6 +10,12 @@ namespace Werwolf.Scripts
     {
         [SerializeField] private TMP_Text stateDisplay;
         private readonly Dictionary<string, GameObject> states = new Dictionary<string, GameObject>();
+
+        public Action<string, string> OnSwitchedState;
+
+        private string _CurrentState;
+
+        public string CurrentState { get => _CurrentState; }
 
         private void Awake()
         {
@@ -32,6 +39,7 @@ namespace Werwolf.Scripts
 
         public void SwitchState(string nextState)
         {
+            
             // only let the master client actually change the game state
             if (PhotonNetwork.IsMasterClient) photonView.RPC("ReceiveStateSwitch", RpcTarget.AllBuffered, nextState);
         }
@@ -41,9 +49,16 @@ namespace Werwolf.Scripts
         {
             if (states.TryGetValue(newState, out GameObject foundState))
             {
+                
+
                 DeactivateAllStates();
                 stateDisplay.text = "State: " + newState;
                 foundState.SetActive(true);
+
+                string oldState = _CurrentState;
+                _CurrentState = newState;
+
+                OnSwitchedState?.Invoke(oldState, _CurrentState);
             }
         }
     }
