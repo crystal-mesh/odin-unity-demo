@@ -46,16 +46,21 @@ namespace Werwolf.Scripts
                 }
 
             GameObject localPlayer = players.GetLocalPlayer();
+            bool canSeeVote = players.IsLocalPlayerAlive();
             if (localPlayer)
             {
                 WerwolfPlayer basicPlayerBehaviour = players.GetLocalPlayer().GetComponent<WerwolfPlayer>();
-                bool canSeeVote = basicPlayerBehaviour.CurrentRole == RoleTypes.Werewolf;
-
                 // Only show the vote to the local player, if they are a werewolf. 
-                voteManager.StartVote(canSeeVote, 1.0f, RoleTypes.Werewolf);
-                voteManager.OnVoteCriteriaMatched += OnVoteEnded;
-                villagerDisplay.gameObject.SetActive(!canSeeVote);
+                canSeeVote = basicPlayerBehaviour.CurrentRole == RoleTypes.Werewolf;
             }
+
+            // all werewolves have to select the same target
+            int werewolfCount = players.GetRoleCount(RoleTypes.Werewolf);
+            
+            voteManager.StartVote(canSeeVote, werewolfCount, RoleTypes.Werewolf);
+            voteManager.OnVoteCriteriaMatched += OnVoteEnded;
+
+            villagerDisplay.gameObject.SetActive(!canSeeVote);
 
             _NightCountdown = StartCoroutine(NightCountdown());
         }

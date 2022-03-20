@@ -18,19 +18,16 @@ namespace Werwolf.Scripts
 
         private readonly Dictionary<int, VoteData> voteDataDictionary = new Dictionary<int, VoteData>();
 
-        private float _requiredVotesPercentage = 1.0f;
-
         public Action<VoteResultData> OnVoteCriteriaMatched;
         // Gets called, when the vote data was updated, but the vote criteria was not yet reached.
         public Action OnInvalidVote;
 
         public int TotalVotes { get; private set; }
-        public int NumPossibleVotes { get; private set; }
 
-        public float RequiredVotesPercentage
+        public int RequiredVotes
         {
-            get => _requiredVotesPercentage;
-            private set => _requiredVotesPercentage = Mathf.Clamp01(value);
+            get;
+            private set;
         }
 
         private void Reset()
@@ -38,7 +35,7 @@ namespace Werwolf.Scripts
             foreach (Transform child in playerListRoot.transform) Destroy(child.gameObject);
             voteDataDictionary.Clear();
             TotalVotes = 0;
-            NumPossibleVotes = 0;
+            RequiredVotes = 0;
         }
 
         private void OnEnable()
@@ -51,14 +48,20 @@ namespace Werwolf.Scripts
             foreach (Transform child in transform) child.gameObject.SetActive(isVisible);
         }
 
-        public void StartVote(bool isVisible, float requiredVotesPercentage = 1.0f, params RoleTypes[] excludedRoles)
+        /// <summary>
+        /// Important: StartVote needs to be called always for all clients - especially the Master Client.
+        /// If it for some reason doesn't get called for the master client (e.g. if the Master Client has been killed
+        /// and the game logic only calls StartVote for alive players), the final vote result will never be 
+        /// used.
+        /// </summary>
+        /// <param name="isVisible"></param>
+        /// <param name="numRequiredVotes"></param>
+        /// <param name="excludedRoles"></param>
+        public void StartVote(bool isVisible, int numRequiredVotes, params RoleTypes[] excludedRoles)
         {
             Reset();
             SetVisibility(isVisible);
-            RequiredVotesPercentage = requiredVotesPercentage;
-
-            if (!PhotonNetwork.IsConnected || !players.IsLocalPlayerAlive())
-                return;
+            RequiredVotes = numRequiredVotes;
 
             foreach (GameObject player in players.All)
             {
@@ -92,7 +95,6 @@ namespace Werwolf.Scripts
             voteView.SetPlayerName(playerName);
 
             // Add To Dictionary
-            NumPossibleVotes++;
             voteDataDictionary.Add(actorNumber, new VoteData { View = voteView, ActorNumber = actorNumber, Count = 0 });
         }
 
@@ -148,7 +150,7 @@ namespace Werwolf.Scripts
 
         private bool HasRequiredVoteCount(VoteData voteData)
         {
-            return (float)voteData.Count / NumPossibleVotes >= RequiredVotesPercentage;
+            return voteData.Count >= RequiredVotes;
         }
 
         /// <summary>

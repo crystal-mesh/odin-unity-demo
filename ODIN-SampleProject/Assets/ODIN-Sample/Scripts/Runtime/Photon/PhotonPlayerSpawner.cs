@@ -10,12 +10,12 @@ namespace ODIN_Sample.Scripts.Runtime.Photon
     /// </summary>
     public class PhotonPlayerSpawner : MonoBehaviour
     {
-        [SerializeField] private OdinStringVariable playerName;
+        [SerializeField] protected OdinStringVariable playerName;
 
         /// <summary>
         ///     Prefab of the player object. Has to be located in a resources folder! (Photon requirement)
         /// </summary>
-        [SerializeField] private GameObject playerPrefab;
+        [SerializeField] protected GameObject playerPrefab;
 
         /// <summary>
         ///     The location at which we should spawn the player.
@@ -29,13 +29,14 @@ namespace ODIN_Sample.Scripts.Runtime.Photon
             Assert.IsNotNull(playerPrefab);
         }
 
-        private void Start()
+        protected virtual void Start()
         {
-            InstantiatePlayer();
+            playerName.Load();
             PhotonNetwork.NickName = playerName;
+            InstantiatePlayer();
         }
 
-        private void InstantiatePlayer()
+        protected void InstantiatePlayer()
         {
             if (null != playerPrefab && PhotonNetwork.IsConnectedAndReady)
             {

@@ -30,5 +30,19 @@ namespace ODIN_Sample.Scripts.Runtime.Odin
         {
             return Value;
         }
+
+        public void Save()
+        {
+            PlayerPrefs.SetString(name, value);
+            PlayerPrefs.Save();
+        }
+
+        public void Load()
+        {
+            if (PlayerPrefs.HasKey(name))
+            {
+                value = PlayerPrefs.GetString(name);
+            }
+        }
     }
 }

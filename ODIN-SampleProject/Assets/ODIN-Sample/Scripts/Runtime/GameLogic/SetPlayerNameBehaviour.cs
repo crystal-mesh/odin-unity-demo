@@ -21,18 +21,15 @@ namespace ODIN_Sample.Scripts.Runtime.GameLogic
 
         private TMP_InputField _playerNameInput = null;
 
-        /// <summary>
-        /// The key used for storing the player name in <c>PlayerPrefs</c>.
-        /// </summary>
-        private static string PlayerNameKey => "PlayerName";
+        
 
         private void Awake()
         {
             _playerNameInput = GetComponent<TMP_InputField>();
             Assert.IsNotNull(playerName);
             
-            string savedName = PlayerPrefs.GetString(PlayerNameKey, "Player");
-            _playerNameInput.text = savedName;
+            playerName.Load();
+            _playerNameInput.text = playerName;
         }
 
         private void OnEnable()
@@ -60,8 +57,7 @@ namespace ODIN_Sample.Scripts.Runtime.GameLogic
         public void SetPlayerName(string newName)
         {
             playerName.Value = newName;
-            PlayerPrefs.SetString(PlayerNameKey, newName);
-            PlayerPrefs.Save();
+            playerName.Save();
         }
     }
 }

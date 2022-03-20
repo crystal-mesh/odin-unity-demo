@@ -1,4 +1,5 @@
-﻿using Photon.Pun;
+﻿using ODIN_Sample.Scripts.Runtime.Odin;
+using Photon.Pun;
 using TMPro;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace Werwolf.Scripts
 
         [SerializeField] private Roles roles;
         [SerializeField] private PlayerList players;
+        [SerializeField] private OdinStringVariable WerewolfVoiceRoom;
          public RoleTypes CurrentRole { get; set; }
 
         private void OnEnable()
@@ -37,10 +39,25 @@ namespace Werwolf.Scripts
         [PunRPC]
         public void SetRole(string role)
         {
-            if (photonView.IsMine)
-                roleDisplay.text = role;
             CurrentRole = roles.FromString(role);
-            Debug.Log($"Current Role: {CurrentRole}");
+
+            if (photonView.IsMine)
+            {
+                roleDisplay.text = role;
+                if (RoleTypes.Werewolf == CurrentRole)
+                    OdinHandler.Instance.JoinRoom(WerewolfVoiceRoom, new OdinSampleUserData());
+                Debug.Log($"Current Role: {CurrentRole}");
+
+            }
+
+        }
+
+        public void OnDestroy()
+        {
+            if (OdinHandler.Instance && photonView.IsMine)
+            {
+                OdinHandler.Instance.LeaveRoom(WerewolfVoiceRoom);
+            }
         }
     }
 }

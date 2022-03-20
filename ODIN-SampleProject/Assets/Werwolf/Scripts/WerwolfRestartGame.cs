@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Assets.Werwolf.Scripts
 {
-    public class PhotonRestart : MonoBehaviour
+    public class WerwolfRestartGame : MonoBehaviour
     {
         [SerializeField] OdinStringVariable targetScene;
         private IEnumerator Start()

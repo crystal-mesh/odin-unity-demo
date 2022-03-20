@@ -10,7 +10,7 @@ namespace Werwolf.Scripts
         [Header("Settings")] [SerializeField] private string nextState;
 
         [SerializeField] private int minWerwolfCount = 1;
-        [SerializeField] private float werewolfPercentage = 0.33f;
+        [SerializeField] private float werewolfPercentage = 0.34f;
 
 
         [Header("References")] [SerializeField]
@@ -46,7 +46,7 @@ namespace Werwolf.Scripts
             stateMachine.SwitchState(nextState);
         }
 
-        private void SelectWerewolves(ref List<GameObject> villagers, float percentage = 0.33f)
+        private void SelectWerewolves(ref List<GameObject> villagers, float percentage)
         {
             int werwolfNum = Mathf.FloorToInt(villagers.Count * percentage);
             werwolfNum = Mathf.Max(minWerwolfCount, werwolfNum);

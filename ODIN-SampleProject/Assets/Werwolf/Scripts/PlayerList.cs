@@ -9,8 +9,6 @@ namespace Werwolf.Scripts
     {
         private readonly List<GameObject> _all = new List<GameObject>();
 
-        private GameObject _localPlayer;
-
         public List<GameObject> All
         {
             get
@@ -39,18 +37,7 @@ namespace Werwolf.Scripts
 
         public GameObject GetLocalPlayer()
         {
-            if (!_localPlayer)
-                foreach (GameObject player in All)
-                {
-                    PhotonView view = player.GetComponent<PhotonView>();
-                    if (view.IsMine)
-                    {
-                        _localPlayer = player;
-                        return player;
-                    }
-                }
-
-            return _localPlayer;
+            return GetGameObjectByActorNumber(PhotonNetwork.LocalPlayer.ActorNumber);
         }
 
         public GameObject GetGameObjectByActorNumber(int actorNumber)
@@ -95,7 +82,7 @@ namespace Werwolf.Scripts
             int totalPlayerCount = All.Count;
 
             // Game Over Conditions:
-            if(werewolveCount >= Mathf.CeilToInt(totalPlayerCount / 2))
+            if(werewolveCount >= Mathf.CeilToInt(totalPlayerCount *0.5f))
                 isGameOver = true;
             
             if (werewolveCount == 0)

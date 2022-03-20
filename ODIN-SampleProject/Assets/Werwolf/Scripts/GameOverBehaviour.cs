@@ -9,11 +9,13 @@ namespace Werwolf.Scripts
     {
         [SerializeField] private PlayerList players;
         [SerializeField] private WerwolfStateMachine stateMachine;
+        [SerializeField] private string waitingForMorePlayersState = "Countdown";
         [SerializeField] private string finalState;
 
         private void OnEnable()
         {
             stateMachine.OnSwitchedState += OnSwitchedState;
+            StartCoroutine(RegularGameOverChecks());
         }
 
         private void OnDisable()
@@ -21,15 +23,33 @@ namespace Werwolf.Scripts
             stateMachine.OnSwitchedState -= OnSwitchedState;
         }
 
-        private void OnSwitchedState(string oldState, string newState)
+        private IEnumerator RegularGameOverChecks()
         {
-            bool isGameOver = players.IsGameOver();
-            if (isGameOver)
+            while (enabled)
             {
-                stateMachine.OnSwitchedState -= OnSwitchedState;
-                stateMachine.SwitchState(finalState);
+                yield return new WaitForSeconds(1.0f);
+                TryEndGame();
             }
         }
 
+
+        private void OnSwitchedState(string oldState, string newState)
+        {
+            TryEndGame();
+        }
+
+        private void TryEndGame()
+        {
+            if(stateMachine.CurrentState != waitingForMorePlayersState)
+            {
+                bool isGameOver = players.IsGameOver();
+                if (isGameOver)
+                {
+                    stateMachine.OnSwitchedState -= OnSwitchedState;
+                    stateMachine.SwitchState(finalState);
+                    StopAllCoroutines();
+                }
+            }
+        }
     }
 }

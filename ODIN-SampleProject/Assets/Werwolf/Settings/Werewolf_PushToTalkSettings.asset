@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99e5fe319994b17878f0c7fd50295bf, type: 3}
+  m_Name: Werewolf_PushToTalkSettings
+  m_EditorClassIdentifier: 
+  settings:
+  - connectedRoom: {fileID: 11400000, guid: 7ed4556c14fa5224a9db9d01fcedbc29, type: 2}
+    pushToTalkButton: {fileID: 11400000, guid: 21ef755c5f5a4e547b3e0fd5e13666cd, type: 2}
+    pushToTalkIsActive: 0
+  - connectedRoom: {fileID: 11400000, guid: 503927e6c05c86f4c8d2fd855bce7d22, type: 2}
+    pushToTalkButton: {fileID: 11400000, guid: 1d6a6e1de9302fc4c96468242dbd09e7, type: 2}
+    pushToTalkIsActive: 1
+  playerPrefsKeyPrefix: Odin.PushToTalkSettings.

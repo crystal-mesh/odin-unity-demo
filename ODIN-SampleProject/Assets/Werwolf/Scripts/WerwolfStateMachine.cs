@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Photon.Pun;
+using Photon.Realtime;
 using TMPro;
 using UnityEngine;
 
@@ -41,8 +42,14 @@ namespace Werwolf.Scripts
         {
             
             // only let the master client actually change the game state
-            if (PhotonNetwork.IsMasterClient) photonView.RPC("ReceiveStateSwitch", RpcTarget.AllBuffered, nextState);
+            if (PhotonNetwork.IsMasterClient) photonView.RPC("ReceiveStateSwitch", RpcTarget.All, nextState);
         }
+
+        public override void OnPlayerEnteredRoom(Player newPlayer)
+        {
+            if (PhotonNetwork.IsMasterClient) photonView.RPC("ReceiveStateSwitch", newPlayer, CurrentState);
+        }
+
 
         [PunRPC]
         private void ReceiveStateSwitch(string newState)

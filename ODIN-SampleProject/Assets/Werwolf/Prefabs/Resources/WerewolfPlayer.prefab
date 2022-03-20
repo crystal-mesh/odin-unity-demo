@@ -369,6 +369,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: WerewolfPlayer
       objectReference: {fileID: 0}
+    - target: {fileID: 2844093388615658216, guid: 01239a6784b826a41acc80906a239246, type: 3}
+      propertyPath: pushToTalkSettings
+      value: 
+      objectReference: {fileID: 11400000, guid: 150933bd8cfc090409d30a905fb399f8, type: 2}
+    - target: {fileID: 4139585757795616959, guid: 01239a6784b826a41acc80906a239246, type: 3}
+      propertyPath: m_Name
+      value: OdinWerewolfSourceRoot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759813537705676269, guid: 01239a6784b826a41acc80906a239246, type: 3}
+      propertyPath: odinRoomName
+      value: 
+      objectReference: {fileID: 11400000, guid: 503927e6c05c86f4c8d2fd855bce7d22, type: 2}
+    - target: {fileID: 6759813537705676269, guid: 01239a6784b826a41acc80906a239246, type: 3}
+      propertyPath: playbackComponentPrefab
+      value: 
+      objectReference: {fileID: 8845918200201091299, guid: a24b1c4516138da4390c93994c7ffba4, type: 3}
+    - target: {fileID: 8964255033531273736, guid: 01239a6784b826a41acc80906a239246, type: 3}
+      propertyPath: odinRoomName
+      value: 
+      objectReference: {fileID: 11400000, guid: 503927e6c05c86f4c8d2fd855bce7d22, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 01239a6784b826a41acc80906a239246, type: 3}
 --- !u!1 &5377415196162936166 stripped
@@ -397,3 +417,4 @@ MonoBehaviour:
   roleDisplay: {fileID: 1099498616565852407}
   roles: {fileID: 11400000, guid: 760a4f2c36fc1e246bf04f46927eaace, type: 2}
   players: {fileID: 11400000, guid: f96e29fee2489324ba11c3f5fddda677, type: 2}
+  WerewolfVoiceRoom: {fileID: 11400000, guid: 503927e6c05c86f4c8d2fd855bce7d22, type: 2}
