@@ -32,11 +32,11 @@
     "floatSettings": [
         {
             "configProperty": "VoiceActivityDetectionAttackProbability",
-            "value": 0.8999999761581421
+            "value": 0.8
         },
         {
             "configProperty": "VoiceActivityDetectionReleaseProbability",
-            "value": 0.800000011920929
+            "value": 0.6
         },
         {
             "configProperty": "VolumeGateAttackLoudness",
